@@ -2,10 +2,10 @@ package ex1
 
 import ex1.*
 import ex1.Parsers.*
-import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ParserTests extends AnyFunSuite with Matchers:
+class ParserTests extends AnyFlatSpec with Matchers:
 
   private def parser: Parser[Char] =
     BasicParser(Set('a', 'b', 'c'))
@@ -26,27 +26,27 @@ class ParserTests extends AnyFunSuite with Matchers:
   private def sparser: Parser[Char] =
     "abc".charParser()
 
-  test("BasicParser accepts only configured characters, including empty input"):
+  "BasicParser" should "accept only configured characters, including empty input" in:
     parser.parseAll("aabc".toList) shouldBe true
     parser.parseAll("aabcdc".toList) shouldBe false
     parser.parseAll("".toList) shouldBe true
 
-  test("NonEmptyParser rejects empty input"):
+  "NonEmptyParser" should "reject empty input" in:
     parserNE.parseAll("0101".toList) shouldBe true
     parserNE.parseAll("0123".toList) shouldBe false
     parserNE.parseAll(List.empty) shouldBe false
 
-  test("NotTwoConsecutiveParser rejects equal consecutive characters"):
+  "NotTwoConsecutiveParser" should "reject equal consecutive characters" in:
     parserNTC.parseAll("XYZ".toList) shouldBe true
     parserNTC.parseAll("XYYZ".toList) shouldBe false
     parserNTC.parseAll("".toList) shouldBe true
 
-  test("NotTwoConsecutive and NonEmpty can be stacked together"):
+  "Stacked parser (NotTwoConsecutive + NonEmpty)" should "combine both constraints" in:
     parserNTCNE.parseAll("XYZ".toList) shouldBe true
     parserNTCNE.parseAll("XYYZ".toList) shouldBe false
     parserNTCNE.parseAll("".toList) shouldBe false
 
-  test("String extension creates a parser for the string character set"):
+  "String extension parser" should "recognise characters from the string" in:
     sparser.parseAll("aabc".toList) shouldBe true
     sparser.parseAll("aabcdc".toList) shouldBe false
     sparser.parseAll("".toList) shouldBe true
