@@ -1,5 +1,7 @@
 package ex3
 
+import scala.annotation.tailrec
+
 object Solitaire extends App:
   def render(solution: Seq[(Int, Int)], width: Int, height: Int): String =
     val reversed = solution.reverse
@@ -11,5 +13,62 @@ object Solitaire extends App:
       yield row.mkString
     rows.mkString("\n")
 
+  def arrayCoord(width: Int)(x: Int, y: Int): Int =
+    y * width + x
 
-  println(render(solution = Seq((0, 0), (2, 1)), width = 3, height = 3))
+  def nextPositions(width: Int, height: Int)(x: Int, y: Int): Seq[(Int, Int)] =
+    Seq(
+      (x + 3, y),
+      (x - 3, y),
+      (x, y + 3),
+      (x, y - 3),
+      (x + 2, y + 2),
+      (x + 2, y - 2),
+      (x - 2, y + 2),
+      (x - 2, y - 2)
+    ).filter((nx, ny) =>
+      nx >= 0 && nx < width &&
+        ny >= 0 && ny < height
+    )
+
+
+  def placeMarks(start: (Int, Int), width: Int, height: Int): List[List[(Int, Int)]] =
+    var currNum = 1
+    val totalCells = width * height
+    val board = Array.fill(totalCells)(0)
+    var solutions: List[List[(Int, Int)]] = List()
+
+    val mapCoord = arrayCoord(width)
+    val mapNextPositions = nextPositions(width, height)
+
+    var currSol = List[(Int, Int)]()
+
+    def search(x: Int, y: Int): Unit =
+      board(mapCoord(x, y)) = currNum
+      currSol = (x, y) :: currSol
+
+      if currNum == totalCells then
+        solutions = currSol :: solutions
+      else
+        currNum += 1
+
+        mapNextPositions(x, y)
+          .filter((nx, ny) => board(mapCoord(nx, ny)) == 0)
+          .foreach(search)
+
+        currNum -= 1
+
+      board(mapCoord(x, y)) = 0
+      currSol = currSol.tail
+
+    search(start._1, start._2)
+
+    solutions.map(x => x.reverse)
+
+
+
+
+  //println(render(solution = Seq((0, 0), (2, 1)), width = 3, height = 3))
+  //println(nextPositions(6, 5)(2, 2))
+
+  println(placeMarks((2, 2), 5, 5).size)
