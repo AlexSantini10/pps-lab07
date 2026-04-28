@@ -14,7 +14,10 @@ abstract class Parser[T]:
     (seq forall parse) & end // note &, not &&
 
 object Parsers:
-  val todo = ??? // put the extensions here..
+  extension (s: String)
+    def charParser(): Parser[Char] =
+      BasicParser(s.toSet)
+
 class BasicParser(chars: Set[Char]) extends Parser[Char]:
   override def parse(t: Char): Boolean = chars.contains(t)
   override def end: Boolean = true
@@ -31,11 +34,32 @@ class NonEmptyParser(chars: Set[Char])
     with NonEmpty[Char]
 
 trait NotTwoConsecutive[T] extends Parser[T]:
-  val todo = ???
-// ???
+  private var previous: Option[T] = None
+
+  abstract override def parse(t: T): Boolean =
+    val ok = previous.forall(_ != t)
+    previous = Some(t)
+    ok && super.parse(t)
+
+  abstract override def end: Boolean =
+    super.end
 
 class NotTwoConsecutiveParser(chars: Set[Char])
-    extends BasicParser(chars) // with ????
+  extends BasicParser(chars)
+  with NotTwoConsecutive[Char]
+
+trait ShortenThenN[T](n: Int) extends Parser[T]:
+  private var parsed: Int = 0
+
+  abstract override def parse(t: T): Boolean =
+    parsed += 1
+
+    (parsed <= n) && super.parse(t)
+
+class ShortenThenNParser(chars: Set[Char], n: Int)
+  extends BasicParser(chars)
+  with ShortenThenN[Char](n)
+
 
 @main def checkParsers(): Unit =
   def parser = new BasicParser(Set('a', 'b', 'c'))
@@ -63,8 +87,9 @@ class NotTwoConsecutiveParser(chars: Set[Char])
   println(parserNTCNE.parseAll("XYZ".toList)) // true
   println(parserNTCNE.parseAll("XYYZ".toList)) // false
   println(parserNTCNE.parseAll("".toList)) // false
-
-  def sparser: Parser[Char] = ??? // "abc".charParser()
+  
+  import Parsers.charParser 
+  def sparser: Parser[Char] = "abc".charParser()
   println(sparser.parseAll("aabc".toList)) // true
   println(sparser.parseAll("aabcdc".toList)) // false
   println(sparser.parseAll("".toList)) // true
