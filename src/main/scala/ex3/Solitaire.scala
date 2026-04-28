@@ -1,6 +1,5 @@
 package ex3
 
-import scala.annotation.tailrec
 
 object Solitaire extends App:
   def render(solution: Seq[(Int, Int)], width: Int, height: Int): String =
@@ -63,12 +62,8 @@ object Solitaire extends App:
 
     search(start._1, start._2)
 
-    solutions.map(x => x.reverse)
+    solutions
 
-
-
-
-  //println(render(solution = Seq((0, 0), (2, 1)), width = 3, height = 3))
-  //println(nextPositions(6, 5)(2, 2))
 
   println(placeMarks((2, 2), 5, 5).size)
+  placeMarks((2, 2), 5, 5).headOption.foreach(s => println(render(s, 5, 5)))
