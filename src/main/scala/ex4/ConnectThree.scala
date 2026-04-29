@@ -5,6 +5,8 @@ import java.util.OptionalInt
 // Optional!
 object ConnectThree extends App:
   val bound = 3
+  val height = 4
+  val width = 4
   enum Player:
     case X, O
     def other: Player = this match
@@ -25,15 +27,71 @@ object ConnectThree extends App:
   type Board = Seq[Disk]
   type Game = Seq[Board]
 
+  extension (board: Board)
+    def at(x: Int, y: Int): Option[Disk] =
+      board.find(d => d.x == x && d.y == y)
+
+    def insert(x: Int, y: Int, player: Player): Option[Board] =
+      if board.exists(d => d.x == x && d.y == y) then None
+      else Some(Disk(x, y, player) +: board)
+
+    def isBoardFull: Boolean =
+      (0 until width).forall(x => firstAvailableRow(board, x).isEmpty)
+
+    def winner(): Option[Player] =
+      def toCheckLines(x: Int, y: Int): Seq[Seq[(Int, Int)]] =
+        val directions = Seq(
+          (1, 0),
+          (0, 1),
+          (1, 1),
+          (1, -1)
+        )
+
+        val lines =
+          for
+            (dx, dy) <- directions
+            start <- -2 to 0
+          yield
+            (0 until 3).map(i => (x + (start + i) * dx, y + (start + i) * dy))
+
+        lines.filter(_.forall((x, y) => x >= 0 && y >= 0 && x < width && y < height))
+
+      def has3Consecutives(disk: Disk): Boolean =
+        val positions = board
+          .filter(_.player == disk.player)
+          .map(d => (d.x, d.y))
+          .toSet
+
+        toCheckLines(disk.x, disk.y)
+          .exists(line => line.forall(positions.contains))
+
+      board.find(has3Consecutives).map(_.player)
+
   import Player.*
 
-  def find(board: Board, x: Int, y: Int): Option[Player] = ???
+  def find(board: Board, x: Int, y: Int): Option[Player] =
+    board.at(x, y).map(_.player)
 
-  def firstAvailableRow(board: Board, x: Int): Option[Int] = ???
+  def firstAvailableRow(board: Board, x: Int): Option[Int] =
+    val occupied = board.filter(d => d.x == x).map(d => d.y)
+    (0 until height).find(y => !occupied.contains(y))
 
-  def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
 
-  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
+  def placeAnyDisk(board: Board, player: Player): Seq[Board] =
+    for
+      x <- 0 until width
+      y <- firstAvailableRow(board, x)
+      newBoard <- board.insert(x, y, player)
+    yield newBoard
+
+  def computeAnyGame(player: Player, moves: Int): LazyList[Game] =
+    if moves == 0 then
+      LazyList(Seq(Seq.empty))
+    else
+      for
+        game <- computeAnyGame(player.other, moves - 1)
+        newBoard <- placeAnyDisk(game.head, player)
+      yield newBoard +: game
 
   def printBoards(game: Seq[Board]): Unit =
     for
