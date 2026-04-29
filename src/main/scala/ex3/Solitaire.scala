@@ -66,4 +66,9 @@ object Solitaire extends App:
 
 
   println(placeMarks((2, 2), 5, 5).size)
-  placeMarks((2, 2), 5, 5).headOption.foreach(s => println(render(s, 5, 5)))
+  // Start timer
+  var startTime = System.currentTimeMillis()
+  placeMarks((3, 5), 5, 7).headOption.foreach(s => println(render(s, 5, 5)))
+  // End timer
+  var endTime = System.currentTimeMillis()
+  println(s"Execution time: ${endTime - startTime} ms")
