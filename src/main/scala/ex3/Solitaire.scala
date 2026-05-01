@@ -64,11 +64,19 @@ object Solitaire extends App:
 
     solutions
 
+  def placeMarks(width: Int, height: Int): List[List[(Int, Int)]] =
+    val start = (width / 2, height / 2)
+    placeMarks(start, width, height)
 
-  println(placeMarks((2, 2), 5, 5).size)
-  // Start timer
-  var startTime = System.currentTimeMillis()
-  placeMarks((3, 5), 5, 7).headOption.foreach(s => println(render(s, 5, 5)))
-  // End timer
-  var endTime = System.currentTimeMillis()
+  val startTime = System.currentTimeMillis()
+  val width = 5
+  val height = 7
+  val start = (width / 2, height / 2)
+  println(s"Solitario del 35 on $width x $height, start at center $start ...")
+
+  val sols = placeMarks(width, height)
+  println(s"Found ${sols.size} solutions")
+  sols.headOption.foreach(s => println(render(s, width, height)))
+
+  val endTime = System.currentTimeMillis()
   println(s"Execution time: ${endTime - startTime} ms")
