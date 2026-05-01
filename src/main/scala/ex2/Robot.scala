@@ -42,7 +42,7 @@ class LoggingRobot(val robot: Robot) extends Robot:
     robot.act()
     println(robot.toString)
 
-// Considero solo act come azione
+// I only consider act as action that consumes battery
 class RobotWithBattery(
   val robot: Robot,
   val batteryStart: Int,
