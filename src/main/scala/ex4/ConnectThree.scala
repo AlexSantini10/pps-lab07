@@ -90,7 +90,12 @@ object ConnectThree extends App:
     else
       for
         game <- computeAnyGame(player.other, moves - 1)
-        newBoard <- placeAnyDisk(game.head, player)
+        current = game.head
+        newBoard <-
+          if current.winner().isDefined || current.isBoardFull then
+            Seq(current)
+          else
+            placeAnyDisk(current, player)
       yield newBoard +: game
 
   def printBoards(game: Seq[Board]): Unit =
@@ -145,4 +150,9 @@ object ConnectThree extends App:
 // .... .... O... O... O...
 // .... X... X... X... X...
 
-// Exercise 4 (VERY ADVANCED!) -- modify the above one so as to stop each game when someone won!!
+  println("EX 5: ")
+  computeAnyGame(O, 8).foreach { g =>
+    printBoards(g)
+    println(s"winner: ${g.head.winner()}")
+    println()
+  }
