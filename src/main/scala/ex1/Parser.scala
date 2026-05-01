@@ -81,6 +81,8 @@ class ShortenThenNParser(chars: Set[Char], n: Int)
   println(parserNTC.parseAll("".toList)) // true
 
   // note we do not need a class name here, we use the structural type
+  // Full linearisation of parserNTCNE:
+  // anon class -> NonEmpty[Char] -> NotTwoConsecutive[Char] -> BasicParser -> Parser[Char] -> AnyRef -> Any
   def parserNTCNE = new BasicParser(Set('X', 'Y', 'Z'))
     with NotTwoConsecutive[Char]
     with NonEmpty[Char]
